@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  go-personas:
+    build:
+      context: .
+    image: go-personas:1.0
+    ports:
+      - 3000:3000
