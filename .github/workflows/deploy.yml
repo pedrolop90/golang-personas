@@ -80,7 +80,8 @@ jobs:
         working-directory: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
         env:
-          data-salida: ${{ steps.terraform-output.outputs.stdout }}
+          data-salida: ${{ fromJson(steps.terraform-output.outputs.stdout).elb_dns_name.value }}
+        continue-on-error: true
         run: echo "${{ env.data-salida }}"
       
       
@@ -108,7 +109,7 @@ jobs:
       - name: Formatear ip de terraform
         env:
           data-salida: ${{ steps.terraform-output.outputs.stdout }}
-        run: echo "instance_public_ip=$(echo ${{ env.data-salida }} |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        run: echo "instance_public_ip=$(echo \"${{ env.data-salida }}\" |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
       
       - name: Salida estandar ip instance
         run: echo "${{ env.instance_public_ip }}"
