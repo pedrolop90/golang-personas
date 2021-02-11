@@ -86,29 +86,23 @@ jobs:
 #          tag_with_sha: true
 #          tags: ${{ github.sha }}
 #
-#      - name: Salida estandar ip instance
-#        id: endpoint_public
-#        #run: echo "IP_INSTANCE=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o \"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]\")"
-#        run: |
-#          echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]" > $ipPublic
-#          echo "IP Public: ${ipPublic}"
-#          echo "::set-output name=ipPublic::${ipPublic}"
-#
-#      - name: executing remote ssh commands using password
-#        uses: appleboy/ssh-action@master
-#        env:
-#          IP_INSTANCE:  ${{ steps.endpoint_public.outputs.ipPublic }}
-#        with:
-#          host: ${{ env.IP_INSTANCE }}
-#          username: ${{ env.USUARIO_EC2 }}
-#          key: ${{ env.LLAVE_PRIVADA_EC2 }}
-#          script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
-      
       - name: Salida estandar ip instance
         id: endpoint_public
+        run: echo "instance_public_ip=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
         env:
-          TESTING_DATA: ${{ secrets.TESTING_DATA }}
-        run: echo "action_state=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
-      - name: Use the value
-        id: step_two
-        run: echo "${{ env.action_state }}"
+          IP_INSTANCE:  ${{ env.instance_public_ip }}
+        with:
+          host: ${{ env.IP_INSTANCE }}
+          username: ${{ env.USUARIO_EC2 }}
+          key: ${{ env.LLAVE_PRIVADA_EC2 }}
+          script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
+      
+#      - name: Salida estandar ip instance
+#        id: endpoint_public
+#        run: echo "action_state=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+#      - name: Use the value
+#        id: step_two
+#        run: echo "${{ env.action_state }}"
