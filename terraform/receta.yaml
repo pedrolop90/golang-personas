@@ -2,5 +2,3 @@
 package_update: true
 packages:
   - docker.io
-runcmd:
-  - docker run -p 3000:3000 --name test -d pedrolop90/golang-personas:latest
