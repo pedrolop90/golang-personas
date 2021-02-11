@@ -109,7 +109,7 @@ jobs:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         env:
-          IP_INSTANCE: ${{ fromJson(steps.terraform-output.outputs.stdout).elb_dns_name.value }}
+          IP_INSTANCE: ${{ fromJson(steps.terraform-output.outputs.stdout).instance_public_ip.value }}
         with:
           host: ${{ env.IP_INSTANCE }}
           username: ${{ env.USUARIO_EC2 }}
