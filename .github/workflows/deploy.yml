@@ -40,40 +40,48 @@ jobs:
         id: validate
         working-directory: ${{ env.working-directory }}
         run: terraform validate -no-color
-
+      
       - name: copiar tfvars al entorno
         working-directory: ${{ env.working-directory }}
         run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
-
+      
       - name: Terraform Plan
         id: plan
         working-directory: ${{ env.working-directory }}
         run: terraform plan -no-color
-
+      
       - name: Terraform Apply
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
-
-#      - name: Terraform Output
-#        id: output
-#        uses: hashicorp/terraform-github-actions@master
-#        with:
-#          tf_actions_version: 0.14.6
-#          tf_actions_subcommand: 'output'
-#          tf_actions_working_dir: ${{ env.working-directory }}
-#      - name: 'Use Terraform Output'
-#        run: echo ${{ steps.output  }}
-      - name: Terraform Output
-        uses: dflook/terraform-output@v1
-        id: output
-        with:
-          path: .
-          workspace: ${{ env.working-directory }}
+      
+      #      - name: Terraform Output
+      #        id: output
+      #        uses: hashicorp/terraform-github-actions@master
+      #        with:
+      #          tf_actions_version: 0.14.6
+      #          tf_actions_subcommand: 'output'
+      #          tf_actions_working_dir: ${{ env.working-directory }}
+      #      - name: 'Use Terraform Output'
+      #        run: echo ${{ steps.output  }}
+      #      - name: Terraform Output
+      #        uses: dflook/terraform-output@v1
+      #        id: output
+      #        working-directory:
+      #        with:
+      #          workspace: ${{ env.working-directory }}
+      #          path: .
+      #      - name: 'Use Terraform Output'
+      #        run: echo ${{ steps.output.outputs  }}
+      
+      - name: 'Terraform Output'
+        id: terraform-output
+        run: terraform output -json
+        continue-on-error: true
       - name: 'Use Terraform Output'
-        run: echo ${{ steps.output.outputs  }}
-
-
+        run: echo ${{ steps.terraform-output.outputs.stdout }}
+      
+      
       - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
         with:
@@ -84,7 +92,7 @@ jobs:
           delete-removed: true
           no-cache: true
           private: true
-
+      
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
         with:
@@ -94,17 +102,17 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
-
+      
       - name: Formatear ip de terraform
         run: echo "instance_public_ip=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
-        
+      
       - name: Salida estandar ip instance
         run: echo "${{ env.instance_public_ip }}"
-
+      
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         env:
-          IP_INSTANCE:  ${{ env.instance_public_ip }}
+          IP_INSTANCE: ${{ env.instance_public_ip }}
         with:
           host: ${{ env.IP_INSTANCE }}
           username: ${{ env.USUARIO_EC2 }}
