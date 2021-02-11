@@ -67,6 +67,7 @@ jobs:
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
         id: apply
+        if: ${{ !contains(steps.terraform-plan.outputs.stdout, 'No changes. Infrastructure is up-to-date') }}
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
 
