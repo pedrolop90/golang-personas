@@ -47,6 +47,22 @@ jobs:
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
+
+      - name: create zip state
+        working-directory: ${{ env.working-directory }}
+        run: zip -r terraform_zip .
+
+      - uses: zdurham/s3-upload-github-action@master
+        working-directory: ${{ env.working-directory }}
+        with:
+          args: --acl public-read
+        env:
+          FILE: ./terraform_zip.zip
+          AWS_REGION: 'us-east-1'
+          S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: echo "hola"
       
       - name: Terraform Output
         id: output
@@ -56,7 +72,7 @@ jobs:
           tf_actions_subcommand: 'output'
           tf_actions_working_dir: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
-        run: echo ${{ steps.terraform.outputs  }}
+        run: echo ${{ steps.output.outputs  }}
       
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
