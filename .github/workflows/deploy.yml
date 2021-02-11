@@ -107,7 +107,7 @@ jobs:
       #nos haria la vida mas facil, pero con user-data esta muy bien la verdad.
       - name: 'Durmiendo dos minutos'
         uses: jakejarvis/wait-action@master
-        if: contains("${{ steps.terraform-plan.outputs.stdout }}", 'pedro')
+        if: ${{ contains("${{ steps.terraform-plan.outputs.stdout }}", 'pedro') }}
         with:
           time: '120s'
       
