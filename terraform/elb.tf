@@ -8,7 +8,7 @@ data "aws_availability_zones" "all_available" {
 
 resource "aws_elb" "terraform_elb_testing_1" {
   name               = "proyecto-golang-personas-elb"
-  availability_zones = data.aws_availability_zones.all_available.zone_ids
+  availability_zones = data.aws_availability_zones.all_available.names
 
   #  access_logs {
   #    bucket        = "terraform_elb_testing_logs_1"
