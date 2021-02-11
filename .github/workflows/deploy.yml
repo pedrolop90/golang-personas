@@ -65,7 +65,7 @@ jobs:
           delete-removed: true
           no-cache: true
           private: true
-
+      
       - name: Terraform Output
         id: output
         uses: hashicorp/terraform-github-actions@master
@@ -73,9 +73,7 @@ jobs:
           tf_actions_version: 0.14.6
           tf_actions_subcommand: 'output'
           tf_actions_working_dir: ${{ env.working-directory }}
-
       - name: 'Use Terraform Output'
-        uses: hashicorp/terraform-github-actions@master
         run: echo ${{ steps.output.outputs  }}
       
       - name: construir y subir a dockerhub
