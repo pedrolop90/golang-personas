@@ -81,7 +81,7 @@ jobs:
       - name: 'Use Terraform Output'
         env:
           data-salida: ${{ steps.terraform-output.outputs.stdout }}
-        run: echo ${{ fromJSON(env.data-salida) }}
+        run: echo ${{ env.data-salida }}
       
       
       - name: Subida Estado a S3
@@ -106,7 +106,9 @@ jobs:
           tags: ${{ github.sha }}
       
       - name: Formatear ip de terraform
-        run: echo "instance_public_ip=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        env:
+          data-salida: ${{ steps.terraform-output.outputs.stdout }}
+        run: echo "instance_public_ip=$(echo ${{ data-salida }} |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
       
       - name: Salida estandar ip instance
         run: echo "${{ env.instance_public_ip }}"
