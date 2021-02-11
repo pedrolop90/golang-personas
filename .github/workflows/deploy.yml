@@ -87,12 +87,13 @@ jobs:
           no-cache: true
           private: true
       
-      - name: 'Construyendo Imagen y Subiendo a dockerhub'
+      - name: 'Login Dockerhub'
         uses: docker/login-action@v1
         with:
           username: ${{ env.DOCKERHUB_USUARIO }}
           password: ${{ env.DOCKERHUB_CONTRASENIA }}
-      - uses: docker/build-push-action@v2
+      - name: 'Construyendo Imagen y Subiendo a Dockerhub'
+        uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
@@ -106,7 +107,7 @@ jobs:
         uses: jakejarvis/wait-action@master
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        #if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
+        if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
         with:
           time: '120s'
       
