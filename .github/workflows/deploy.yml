@@ -100,6 +100,8 @@ jobs:
           host: ${{ env.IP_INSTANCE }}
           username: ${{ env.USUARIO_EC2 }}
           key: ${{ env.LLAVE_PRIVADA_EC2 }}
-          script: sudo docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
+          script: |
+            sudo docker login -u ${{ env.DOCKERHUB_USUARIO }} -p ${{ env.DOCKERHUB_CONTRASENIA }}
+            sudo docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
         continue-on-error: true
         
