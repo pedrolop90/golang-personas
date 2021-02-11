@@ -3,12 +3,12 @@ data "aws_vpc" "default" {
 }
 
 data "aws_availability_zones" "all_available" {
-  all_availability_zones = true
+  state = "available"
 }
 
 resource "aws_elb" "terraform_elb_testing_1" {
   name               = "proyecto-golang-personas-elb"
-  availability_zones = data.aws_availability_zones.all_available.names
+  availability_zones = data.aws_availability_zones.all_available.zone_ids
 
   #  access_logs {
   #    bucket        = "terraform_elb_testing_logs_1"

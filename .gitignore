@@ -30,3 +30,5 @@ out/
 *.tfvars
 *.lock.hcl
 *.terraform
+*.tfstate
+*.tfstate.*
