@@ -62,13 +62,11 @@ jobs:
         id: terraform-plan
         working-directory: ${{ env.working-directory }}
         run: terraform plan -no-color
-        
-      - name: 'Salida Plan'
-        env:
-          data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        run: echo "${{ env.data-salida }}"
       
       - name: 'Ejecutando Terraform Apply'
+        env:
+          data-salida: ${{ steps.terraform-plan.outputs.stdout }}
+        if: !contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date')
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
@@ -77,12 +75,6 @@ jobs:
         id: terraform-output
         run: terraform output -json
         working-directory: ${{ env.working-directory }}
-      - name: 'Mostrando Salida Terraform'
-        env:
-          data-salida: ${{ steps.terraform-output.outputs.stdout }}
-        continue-on-error: true
-        run: echo "${{ env.data-salida }}"
-      
       
       - name: 'Subiendo Archivos a S3'
         uses: reggionick/s3-deploy@v3
@@ -96,10 +88,15 @@ jobs:
           private: true
       
       - name: 'Construyendo Imagen y Subiendo a dockerhub'
-        uses: docker/build-push-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
           username: ${{ env.DOCKERHUB_USUARIO }}
           password: ${{ env.DOCKERHUB_CONTRASENIA }}
+      - uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
           repository: ${{ env.DOCKERHUB_REPOSITORIO }}
           tag_with_ref: true
           tag_with_sha: true
@@ -108,6 +105,9 @@ jobs:
       
       - name: 'Durmiendo dos minutos'
         uses: jakejarvis/wait-action@master
+        env:
+          data-salida: ${{ steps.terraform-plan.outputs.stdout }}
+        if: !contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date')
         with:
           time: '120s'
       
