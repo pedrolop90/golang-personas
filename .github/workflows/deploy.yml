@@ -13,51 +13,64 @@ jobs:
     env:
       working-directory: ./terraform
     steps:
-      - uses: hashicorp/setup-terraform@v1
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'example'
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: 'example'
+#      - uses: hashicorp/setup-terraform@v1
 #      - name: Terraform fmt
 #        id: fmt
 #        working-directory: ${{ working-directory }}
 #        run: terraform fmt -check
-      - name: Terraform Init
-        id: init
+#      - name: Terraform Init
+#        id: init
         #working-directory: ${{ env.working-directory }}
-        run: terraform init
-      - name: Terraform Validate
-        id: validate
-        working-directory: ${{ env.working-directory }}
-        run: terraform validate -no-color
-      - name: Terraform Plan
-        id: plan
-        working-directory: ${{ env.working-directory }}
-        run: terraform plan -no-color
+#        run: terraform init
+#      - name: Terraform Validate
+#        id: validate
+#        working-directory: ${{ env.working-directory }}
+#        run: terraform validate -no-color
+#      - name: Terraform Plan
+#        id: plan
+#        working-directory: ${{ env.working-directory }}
+#        run: terraform plan -no-color
+#
+#      - run: echo ${{ steps.plan.outputs.stderr }}
+#      - run: echo ${{ steps.plan.outputs.exitcode }}
+#
+#      - name: Terraform Apply
+#        id: apply
+#        working-directory: ${{ env.working-directory }}
+#        env:
+#          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
+#        run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars && terraform apply -auto-approve
+#
+#      - run: echo ${{ steps.apply.outputs.stdout }}
       
-      - run: echo ${{ steps.plan.outputs.stderr }}
-      - run: echo ${{ steps.plan.outputs.exitcode }}
-      
-      - name: Terraform Apply
-        id: apply
-        working-directory: ${{ env.working-directory }}
-        env:
-          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
-        run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars && terraform apply -auto-approve
-      
-      - run: echo ${{ steps.apply.outputs.stdout }}
-      
-      - name: bajar codigo al servidor
-        uses: actions/checkout@master
-      - name: construir y subir a dockerhub
-        uses: docker/build-push-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USUARIO }}
-          password: ${{ secrets.DOCKERHUB_CONTRASENIA }}
-          repository: ${{ secrets.DOCKERHUB_REPOSITORIO }}
-          tag_with_ref: true
-          tag_with_sha: true
-          tags: ${{ github.sha }}
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ steps.apply.outputs.elb_dns_name }}
-          username: ${{ secrets.USUARIO_EC2 }}
-          key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
-          script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
+#      - name: bajar codigo al servidor
+#        uses: actions/checkout@master
+#      - name: construir y subir a dockerhub
+#        uses: docker/build-push-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USUARIO }}
+#          password: ${{ secrets.DOCKERHUB_CONTRASENIA }}
+#          repository: ${{ secrets.DOCKERHUB_REPOSITORIO }}
+#          tag_with_ref: true
+#          tag_with_sha: true
+#          tags: ${{ github.sha }}
+#      - name: executing remote ssh commands using password
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ steps.apply.outputs.elb_dns_name }}
+#          username: ${{ secrets.USUARIO_EC2 }}
+#          key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
+#          script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
+#
