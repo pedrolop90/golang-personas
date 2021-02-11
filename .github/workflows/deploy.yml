@@ -87,12 +87,14 @@ jobs:
           tags: ${{ github.sha }}
       
       - name: Salida estandar ruta elb
-        run: echo " ${{ steps.output.outputs.instance_public_ip.value }}"
+        run: apt-get install jq
+          DB=$(echo ${{ steps.output.outputs }} | jq -r '.instance_public_ip.value')
+          echo $DBNAME
       
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ steps.output.outputs.instance_public_ip.value }}
+          host: $DBNAME
           username: ${{ env.USUARIO_EC2 }}
           key: ${{ env.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
