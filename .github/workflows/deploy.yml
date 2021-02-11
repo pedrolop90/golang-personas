@@ -66,7 +66,6 @@ jobs:
       - name: 'Ejecutando Terraform Apply'
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        #if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
@@ -103,11 +102,14 @@ jobs:
           tags: "${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}"
           push: true
       
+      #Esta validacion es porque el user-data se demora x tiempo en aprovisionar la maquina con la receta que hayamos
+      #definido entonces debemos tener en cuenta ese tiempo, quizas una implementacion mas directa con ansible o chef
+      #nos haria la vida mas facil, pero con user-data esta muy bien la verdad.
       - name: 'Durmiendo dos minutos'
         uses: jakejarvis/wait-action@master
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
+        if: !contains(${{ env.data-salida }}, 'Infrastructure is up-to-date')
         with:
           time: '120s'
       
