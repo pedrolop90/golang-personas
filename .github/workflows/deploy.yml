@@ -80,7 +80,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
         env:
-          data-salida: ${{ fromJson(steps.terraform-output.outputs.stdout).elb_dns_name.value }}
+          data-salida: ${{ steps.terraform-output.outputs.stdout }}
         continue-on-error: true
         run: echo "${{ env.data-salida }}"
       
@@ -106,18 +106,10 @@ jobs:
           tag_with_sha: true
           tags: ${{ github.sha }}
       
-      - name: Formatear ip de terraform
-        env:
-          data-salida: ${{ steps.terraform-output.outputs.stdout }}
-        run: echo "instance_public_ip=$(echo \"${{ env.data-salida }}\" |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
-      
-      - name: Salida estandar ip instance
-        run: echo "${{ env.instance_public_ip }}"
-      
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         env:
-          IP_INSTANCE: ${{ env.instance_public_ip }}
+          IP_INSTANCE: ${{ fromJson(steps.terraform-output.outputs.stdout).elb_dns_name.value }}
         with:
           host: ${{ env.IP_INSTANCE }}
           username: ${{ env.USUARIO_EC2 }}
