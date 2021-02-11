@@ -29,3 +29,4 @@ out/
 ### TERRAFORM ###
 *.tfvars
 *.lock.hcl
+*.terraform
