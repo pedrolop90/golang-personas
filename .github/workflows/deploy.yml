@@ -56,7 +56,7 @@ jobs:
         run: terraform apply -auto-approve
       
       - name: Copiar Todo a Temp
-        run: cp -t ${{ env.GITHUB_WORKSPACE }}/test/ ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate
+        run: mkdir test && cp -t ${{ env.GITHUB_WORKSPACE }}/test/ ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate
       
       - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
