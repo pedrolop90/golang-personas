@@ -10,6 +10,7 @@ jobs:
   terraform:
     name: despliegue a al ambiente dev
     runs-on: ubuntu-20.04
+    timeout-minutes: 15
     env:
       working-directory: ./terraform
     steps:
@@ -50,7 +51,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
       
-      - run: echo ${{ steps.apply.outputs.stdout }}
+      - run: echo "${{ steps.plan.outputs.stdout }}"
       
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
