@@ -3,7 +3,7 @@ data "aws_vpc" "default" {
 }
 
 data "aws_availability_zones" "all_available" {
-  state = "available"
+  all_availability_zones = true
 }
 
 resource "aws_elb" "terraform_elb_testing_1" {
