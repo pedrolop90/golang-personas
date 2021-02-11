@@ -40,11 +40,11 @@ jobs:
         id: validate
         working-directory: ${{ env.working-directory }}
         run: terraform validate -no-color
-        
+      
       - name: copiar tfvars al entorno
         working-directory: ${{ env.working-directory }}
         run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
-        
+      
       - name: Terraform Plan
         id: plan
         working-directory: ${{ env.working-directory }}
@@ -54,20 +54,22 @@ jobs:
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
-  
+      
+      - name: Copiar Todo a Temp
+        working-directory: 'test'
+        run: cp -t ${{ terraform.tfstate.backup }}/test/ ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate
+      
       - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
-        working-directory: 'test'
         with:
-          folder: .
+          folder: 'test'
           bucket: ${{ env.AWS_S3_BUCKET }}
           bucket-region: ${{ env.AWS_S3_REGION }}
           invalidation: /
           delete-removed: true
           no-cache: true
           private: true
-        run: cp -t ${{ terraform.tfstate.backup }}/test/ ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate
-  
+      
       - name: Terraform Output
         id: output
         uses: hashicorp/terraform-github-actions@master
@@ -87,7 +89,7 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
-          
+      
       - run: echo "${{ steps.apply.outputs }}"
       
       - name: executing remote ssh commands using password
