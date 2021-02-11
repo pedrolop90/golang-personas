@@ -15,18 +15,18 @@ jobs:
     steps:
       - name: bajar codigo al servidor
         uses: actions/checkout@master
-#      - name: 'Terraform Init'
-#        uses: hashicorp/terraform-github-actions@v0.6.1
-#        with:
-#          tf_actions_version: 0.12.13
-#          tf_actions_subcommand: 'init'
-#          tf_actions_working_dir:  'terraform'
-#      - name: 'Terraform Validate'
-#        uses: hashicorp/terraform-github-actions@v0.6.1
-#        with:
-#          tf_actions_version: 0.12.13
-#          tf_actions_subcommand: 'validate'
-#          tf_actions_working_dir: 'terraform'
+      #      - name: 'Terraform Init'
+      #        uses: hashicorp/terraform-github-actions@v0.6.1
+      #        with:
+      #          tf_actions_version: 0.12.13
+      #          tf_actions_subcommand: 'init'
+      #          tf_actions_working_dir:  'terraform'
+      #      - name: 'Terraform Validate'
+      #        uses: hashicorp/terraform-github-actions@v0.6.1
+      #        with:
+      #          tf_actions_version: 0.12.13
+      #          tf_actions_subcommand: 'validate'
+      #          tf_actions_working_dir: 'terraform'
       - uses: hashicorp/setup-terraform@v1
       - name: Terraform fmt
         id: fmt
@@ -40,23 +40,30 @@ jobs:
         id: validate
         working-directory: ${{ env.working-directory }}
         run: terraform validate -no-color
-      - name: Terraform Plan
-        id: plan
-        working-directory: ${{ env.working-directory }}
-        run: terraform plan -no-color
-
-      - run: echo ${{ steps.plan.outputs.stderr }}
-      - run: echo ${{ steps.plan.outputs.exitcode }}
-
-      - name: Terraform Apply
-        id: apply
+        
+      - name: copiar tfvars al entorno
         working-directory: ${{ env.working-directory }}
         env:
           TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
-        run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars && terraform apply -auto-approve
-
+        run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars
+        
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ env.working-directory }}
+        env:
+          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
+        run: terraform plan -no-color
+      
+      - run: echo ${{ steps.plan.outputs.stderr }}
+      - run: echo ${{ steps.plan.outputs.exitcode }}
+      
+      - name: Terraform Apply
+        id: apply
+        working-directory: ${{ env.working-directory }}
+        run: terraform apply -auto-approve
+      
       - run: echo ${{ steps.apply.outputs.stdout }}
-
+      
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
         with:
