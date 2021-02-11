@@ -20,15 +20,15 @@ jobs:
 #        run: terraform fmt -check
       - name: Terraform Init
         id: init
-        working-directory: ${{ working-directory }}
+        working-directory: ${{ env.working-directory }}
         run: terraform init
       - name: Terraform Validate
         id: validate
-        working-directory: ${{ working-directory }}
+        working-directory: ${{ env.working-directory }}
         run: terraform validate -no-color
       - name: Terraform Plan
         id: plan
-        working-directory: ${{ working-directory }}
+        working-directory: ${{ env.working-directory }}
         run: terraform plan -no-color
       
       - run: echo ${{ steps.plan.outputs.stderr }}
@@ -36,7 +36,7 @@ jobs:
       
       - name: Terraform Apply
         id: apply
-        working-directory: ${{ working-directory }}
+        working-directory: ${{ env.working-directory }}
         env:
           TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
         run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars && terraform apply -auto-approve
