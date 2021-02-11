@@ -87,10 +87,10 @@ jobs:
           tag_with_sha: true
           tags: ${{ github.sha }}
       
-      - name: 'Durmiendo tres minutos'
+      - name: 'Durmiendo dos minutos'
         uses: jakejarvis/wait-action@master
         with:
-          time: '180s'
+          time: '120s'
       
       - name: 'Ejecutando Comandos remotos SSH'
         uses: appleboy/ssh-action@master
