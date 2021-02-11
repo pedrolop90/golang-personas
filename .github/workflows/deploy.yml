@@ -1,18 +1,62 @@
-on: push
-name: pipeline deploy
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+name: pipeline despliegue
 jobs:
-  pipeline:
-    name: despliegue a cluster
+  terraform:
+    name: despliegue a al ambiente dev
     runs-on: ubuntu-20.04
     steps:
+      - uses: hashicorp/setup-terraform@v1
+      - name: Terraform fmt
+        id: fmt
+        working-directory: ./terraform
+        run: terraform fmt -check
+      - name: Terraform Init
+        id: init
+        working-directory: ./terraform
+        run: terraform init
+      - name: Terraform Validate
+        id: validate
+        working-directory: ./terraform
+        run: terraform validate -no-color
+      - name: Terraform Plan
+        id: plan
+        working-directory: ./terraform
+        run: terraform plan -no-color
+      
+      - run: echo ${{ steps.plan.outputs.stderr }}
+      - run: echo ${{ steps.plan.outputs.exitcode }}
+      
+      - name: Terraform Apply
+        id: apply
+        working-directory: ./terraform
+        env:
+          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
+        run: |
+        echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars && terraform apply -auto-approve
+      
+      - run: echo ${{ steps.apply.outputs.stdout }}
+      
       - name: bajar codigo al servidor
         uses: actions/checkout@master
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: ${{ secrets.DOCKERHUB_REPOSITORY }}
+          username: ${{ secrets.DOCKERHUB_USUARIO }}
+          password: ${{ secrets.DOCKERHUB_CONTRASENIA }}
+          repository: ${{ secrets.DOCKERHUB_REPOSITORIO }}
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.apply.outputs.elb_dns_name }}
+          username: ${{ secrets.USUARIO_EC2:ubuntu }}
+          key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
+          script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
