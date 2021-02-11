@@ -27,68 +27,70 @@ jobs:
     steps:
       - name: bajar codigo al servidor
         uses: actions/checkout@master
-#      - uses: hashicorp/setup-terraform@v1
-#      - name: Terraform fmt
-#        id: fmt
-#        working-directory: ${{ env.working-directory }}
-#        run: terraform fmt -check
-#      - name: Terraform Init
-#        id: init
-#        working-directory: ${{ env.working-directory }}
-#        run: terraform init
-#      - name: Terraform Validate
-#        id: validate
-#        working-directory: ${{ env.working-directory }}
-#        run: terraform validate -no-color
-#
-#      - name: copiar tfvars al entorno
-#        working-directory: ${{ env.working-directory }}
-#        run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
-#
-#      - name: Terraform Plan
-#        id: plan
-#        working-directory: ${{ env.working-directory }}
-#        run: terraform plan -no-color
-#
-#      - name: Terraform Apply
-#        id: apply
-#        working-directory: ${{ env.working-directory }}
-#        run: terraform apply -auto-approve
-#
-#      - name: Terraform Output
-#        id: output
-#        uses: hashicorp/terraform-github-actions@master
-#        with:
-#          tf_actions_version: 0.14.6
-#          tf_actions_subcommand: 'output'
-#          tf_actions_working_dir: ${{ env.working-directory }}
-#      - name: 'Use Terraform Output'
-#        run: echo ${{ steps.output.outputs  }}
-#
-#      - name: Subida Estado a S3
-#        uses: reggionick/s3-deploy@v3
-#        with:
-#          folder: ${{ env.working-directory }}
-#          bucket: ${{ env.AWS_S3_BUCKET }}
-#          bucket-region: ${{ env.AWS_S3_REGION }}
-#          invalidation: /
-#          delete-removed: true
-#          no-cache: true
-#          private: true
-#
-#      - name: construir y subir a dockerhub
-#        uses: docker/build-push-action@v2
-#        with:
-#          username: ${{ env.DOCKERHUB_USUARIO }}
-#          password: ${{ env.DOCKERHUB_CONTRASENIA }}
-#          repository: ${{ env.DOCKERHUB_REPOSITORIO }}
-#          tag_with_ref: true
-#          tag_with_sha: true
-#          tags: ${{ github.sha }}
-#
+      - uses: hashicorp/setup-terraform@v1
+      - name: Terraform fmt
+        id: fmt
+        working-directory: ${{ env.working-directory }}
+        run: terraform fmt -check
+      - name: Terraform Init
+        id: init
+        working-directory: ${{ env.working-directory }}
+        run: terraform init
+      - name: Terraform Validate
+        id: validate
+        working-directory: ${{ env.working-directory }}
+        run: terraform validate -no-color
+
+      - name: copiar tfvars al entorno
+        working-directory: ${{ env.working-directory }}
+        run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ env.working-directory }}
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        id: apply
+        working-directory: ${{ env.working-directory }}
+        run: terraform apply -auto-approve
+
+      - name: Terraform Output
+        id: output
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.14.6
+          tf_actions_subcommand: 'output'
+          tf_actions_working_dir: ${{ env.working-directory }}
+      - name: 'Use Terraform Output'
+        run: echo ${{ steps.output.outputs  }}
+
+      - name: Subida Estado a S3
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: ${{ env.working-directory }}
+          bucket: ${{ env.AWS_S3_BUCKET }}
+          bucket-region: ${{ env.AWS_S3_REGION }}
+          invalidation: /
+          delete-removed: true
+          no-cache: true
+          private: true
+
+      - name: construir y subir a dockerhub
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_USUARIO }}
+          password: ${{ env.DOCKERHUB_CONTRASENIA }}
+          repository: ${{ env.DOCKERHUB_REPOSITORIO }}
+          tag_with_ref: true
+          tag_with_sha: true
+          tags: ${{ github.sha }}
+
       - name: Salida estandar ip instance
         id: endpoint_public
-        run: echo "instance_public_ip=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        env:
+          data_entrada: ${{ steps.output.outputs }}
+        run: echo "instance_public_ip=$(echo ${{ env.data_entrada }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
@@ -99,10 +101,3 @@ jobs:
           username: ${{ env.USUARIO_EC2 }}
           key: ${{ env.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
-      
-#      - name: Salida estandar ip instance
-#        id: endpoint_public
-#        run: echo "action_state=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
-#      - name: Use the value
-#        id: step_two
-#        run: echo "${{ env.action_state }}"
