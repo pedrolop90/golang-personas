@@ -42,14 +42,12 @@ jobs:
         run: terraform validate -no-color
           
       - uses: prewk/s3-cp-action@master
-        working-directory: ${{ env.working-directory }}
         env:
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_S3_REGION }}
           SOURCE: 's3://terraform-state-test-github-actions/terraform.tfstate'
-          DEST: './terraform.tfstate'
-        run: ls -l
+          DEST: '${{ env.working-directory }}/terraform.tfstate'
       
       - name: 'Generando tfvars al entorno'
         working-directory: ${{ env.working-directory }}
