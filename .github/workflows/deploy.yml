@@ -47,10 +47,6 @@ jobs:
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
-
-      - name: create zip state
-        working-directory: ${{ env.working-directory }}
-        run:
   
       - name: Deploy
         uses: reggionick/s3-deploy@v3
