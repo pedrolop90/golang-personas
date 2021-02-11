@@ -56,6 +56,6 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.apply.outputs.elb_dns_name }}
-          username: ${{ secrets.USUARIO_EC2:ubuntu }}
+          username: ${{ secrets.USUARIO_EC2 }}
           key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
