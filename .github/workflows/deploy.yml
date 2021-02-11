@@ -88,7 +88,7 @@ jobs:
       
       - name: Salida estandar ruta elb
         run: apt-get install jq
-          DB=$(echo ${{ steps.output.outputs }} | jq -r '.instance_public_ip.value')
+          $DBNAME = $(echo ${{ steps.output.outputs }} | jq -r '.instance_public_ip["value"]')
           echo $DBNAME
       
       - name: executing remote ssh commands using password
