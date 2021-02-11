@@ -41,22 +41,32 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: terraform validate -no-color
           
-      - uses: prewk/s3-cp-action@master
+      - name: 'Bajando estado de Terraform'
+        uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_S3_REGION }}
           SOURCE: 's3://terraform-state-test-github-actions/terraform.tfstate'
           DEST: '${{ env.working-directory }}/terraform.tfstate'
+        continue-on-error: true
+      - name: 'Dando permisos a estado de Terraform'
+        working-directory: ${{ env.working-directory }}
+        run: chmod 777 terraform.tfstate
       
       - name: 'Generando tfvars al entorno'
         working-directory: ${{ env.working-directory }}
         run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
       
       - name: 'Ejecutando Terraform Plan'
-        id: plan
+        id: terraform-plan
         working-directory: ${{ env.working-directory }}
         run: terraform plan -no-color
+        
+      - name: 'Salida Plan'
+        env:
+          data-salida: ${{ steps.terraform-plan.outputs.stdout }}
+        run: echo "${{ env.data-salida }}"
       
       - name: 'Ejecutando Terraform Apply'
         id: apply
