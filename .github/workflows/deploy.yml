@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         env:
           TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
-        run: echo "TERRAFORM_TFVARS_BASE64" | base64 -d > ./terraform.tfvars
+        run: echo "${{ secrets.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
         
       - name: Terraform Plan
         id: plan
