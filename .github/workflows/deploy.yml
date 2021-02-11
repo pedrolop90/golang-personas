@@ -54,22 +54,7 @@ jobs:
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
-      
-      - name: Copiar Todo a Temp
-        working-directory: 'test'
-        run: mkdir test && cp -t . ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ env.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate
-      
-      - name: Subida Estado a S3
-        uses: reggionick/s3-deploy@v3
-        with:
-          folder: 'test'
-          bucket: ${{ env.AWS_S3_BUCKET }}
-          bucket-region: ${{ env.AWS_S3_REGION }}
-          invalidation: /
-          delete-removed: true
-          no-cache: true
-          private: true
-      
+
       - name: Terraform Output
         id: output
         uses: hashicorp/terraform-github-actions@master
@@ -77,7 +62,20 @@ jobs:
           tf_actions_version: 0.14.6
           tf_actions_subcommand: 'output'
           tf_actions_working_dir: ${{ env.working-directory }}
+      
+      - name: Subida Estado a S3
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: ${{ env.working-directory }}
+          bucket: ${{ env.AWS_S3_BUCKET }}
+          bucket-region: ${{ env.AWS_S3_REGION }}
+          invalidation: /
+          delete-removed: true
+          no-cache: true
+          private: true
+
       - name: 'Use Terraform Output'
+        uses: hashicorp/terraform-github-actions@master
         run: echo ${{ steps.output.outputs  }}
       
       - name: construir y subir a dockerhub
