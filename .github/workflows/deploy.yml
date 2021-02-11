@@ -63,7 +63,7 @@ jobs:
           tf_actions_subcommand: 'output'
           tf_actions_working_dir: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
-        run: echo ${{ steps.output.outputs  }}
+        run: cat ${{ steps.output.outputs  }}
 
       - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
