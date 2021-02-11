@@ -68,7 +68,8 @@ jobs:
         uses: dflook/terraform-output@v1
         id: output
         with:
-          path: '${{ env.working-directory }}/output.tf'
+          path: .
+          workspace: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
         run: echo ${{ steps.output.outputs  }}
 
