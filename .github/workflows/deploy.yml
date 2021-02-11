@@ -24,6 +24,7 @@ jobs:
       USUARIO_EC2: ${{ secrets.USUARIO_EC2 }}
       LLAVE_PRIVADA_EC2: ${{ secrets.LLAVE_PRIVADA_EC2 }}
       PUERTO_APLICACION: ${{ secrets.PUERTO_APLICACION }}
+      IP_INSTANCE: ''
     steps:
       - name: bajar codigo al servidor
         uses: actions/checkout@master
@@ -86,13 +87,13 @@ jobs:
           tag_with_sha: true
           tags: ${{ github.sha }}
         
-      - name: Salida estandar ruta elb
-        run: DBNAME = $(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]")
+      - name: Salida estandar ip instance
+        run: echo "IP_INSTANCE=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o \"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]\")"
       
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: $DBNAME
+          host: {{ env.IP_INSTANCE }}
           username: ${{ env.USUARIO_EC2 }}
           key: ${{ env.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
