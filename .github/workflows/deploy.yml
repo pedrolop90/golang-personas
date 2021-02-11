@@ -13,12 +13,14 @@ jobs:
     env:
       working-directory: ./terraform
     steps:
+      - name: bajar codigo al servidor
+        uses: actions/checkout@master
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@v0.6.1
         with:
           tf_actions_version: 0.12.13
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir:  '${{ github.GITHUB_WORKSPACE }}/terraform'
+          tf_actions_working_dir:  'terraform'
       - name: 'Terraform Validate'
         uses: hashicorp/terraform-github-actions@v0.6.1
         with:
