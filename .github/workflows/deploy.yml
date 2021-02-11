@@ -85,11 +85,14 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
-      
+
       - name: Salida estandar ruta elb
         run: apt-get install jq
-          $DBNAME = $(echo ${{ steps.output.outputs }} | jq -r '.instance_public_ip["value"]')
-          echo $DBNAME
+          echo ${{ steps.output.outputs }} | jq .elb_dns_name
+        
+      - name: Salida estandar ruta elb
+        run: apt-get install jq
+          echo ${{ steps.output.outputs }} | jq .instance_public_ip
       
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
