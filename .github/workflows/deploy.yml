@@ -79,7 +79,9 @@ jobs:
         run: terraform output -json
         working-directory: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
-        run: echo ${{ steps.terraform-output.outputs.stdout }}
+        env:
+          data-salida: ${{ steps.terraform-output.outputs.stdout }}
+        run: echo ${{ fromJSON(env.data-salida) }}
       
       
       - name: Subida Estado a S3
