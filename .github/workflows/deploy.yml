@@ -13,6 +13,17 @@ jobs:
     timeout-minutes: 15
     env:
       working-directory: ./terraform
+      TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
+      DOCKERHUB_USUARIO: ${{ secrets.DOCKERHUB_USUARIO }}
+      DOCKERHUB_CONTRASENIA: ${{ secrets.DOCKERHUB_CONTRASENIA }}
+      DOCKERHUB_REPOSITORIO: ${{ secrets.DOCKERHUB_REPOSITORIO }}
+      USUARIO_EC2: ${{ secrets.USUARIO_EC2 }}
+      LLAVE_PRIVADA_EC2: ${{ secrets.LLAVE_PRIVADA_EC2 }}
+      PUERTO_APLICACION: ${{ secrets.PUERTO_APLICACION }}
     steps:
       - name: bajar codigo al servidor
         uses: actions/checkout@master
@@ -32,15 +43,11 @@ jobs:
         
       - name: copiar tfvars al entorno
         working-directory: ${{ env.working-directory }}
-        env:
-          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
-        run: echo "${{ secrets.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
+        run: echo "${{ env.TERRAFORM_TFVARS_BASE64 }}" | base64 -d > ./terraform.tfvars
         
       - name: Terraform Plan
         id: plan
         working-directory: ${{ env.working-directory }}
-        env:
-          TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
         run: terraform plan -no-color
       
       - name: Terraform Apply
@@ -48,19 +55,18 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
   
-      - name: Deploy
+      - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        working-directory: 'test'
         with:
           folder: .
-          bucket: ${{ secrets.AWS_S3_BUCKET }}
-          bucket-region: 'us-east-1'
+          bucket: ${{ env.AWS_S3_BUCKET }}
+          bucket-region: ${{ env.AWS_S3_REGION }}
           invalidation: /
           delete-removed: true
           no-cache: true
           private: true
+        run: cp -t ${{ terraform.tfstate.backup }}/test/ ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate
   
       - name: Terraform Output
         id: output
@@ -75,9 +81,9 @@ jobs:
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USUARIO }}
-          password: ${{ secrets.DOCKERHUB_CONTRASENIA }}
-          repository: ${{ secrets.DOCKERHUB_REPOSITORIO }}
+          username: ${{ env.DOCKERHUB_USUARIO }}
+          password: ${{ env.DOCKERHUB_CONTRASENIA }}
+          repository: ${{ env.DOCKERHUB_REPOSITORIO }}
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
@@ -88,6 +94,6 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: $(echo ${{ steps.output.outputs.tf_actions_output }} | jq -r '.elb_dns_name.value.name')
-          username: ${{ secrets.USUARIO_EC2 }}
-          key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
-          script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
+          username: ${{ env.USUARIO_EC2 }}
+          key: ${{ env.LLAVE_PRIVADA_EC2 }}
+          script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
