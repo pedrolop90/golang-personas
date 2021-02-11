@@ -54,6 +54,17 @@ jobs:
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
+      
+      - name: Subida Estado a S3
+        uses: reggionick/s3-deploy@v3
+        with:
+          folder: ${{ env.working-directory }}
+          bucket: ${{ env.AWS_S3_BUCKET }}
+          bucket-region: ${{ env.AWS_S3_REGION }}
+          invalidation: /
+          delete-removed: true
+          no-cache: true
+          private: true
 
       - name: Terraform Output
         id: output
@@ -66,17 +77,6 @@ jobs:
       - name: 'Use Terraform Output'
         uses: hashicorp/terraform-github-actions@master
         run: echo ${{ steps.output.outputs  }}
-      
-      - name: Subida Estado a S3
-        uses: reggionick/s3-deploy@v3
-        with:
-          folder: ${{ env.working-directory }}
-          bucket: ${{ env.AWS_S3_BUCKET }}
-          bucket-region: ${{ env.AWS_S3_REGION }}
-          invalidation: /
-          delete-removed: true
-          no-cache: true
-          private: true
       
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
