@@ -81,7 +81,7 @@ jobs:
       - name: 'Use Terraform Output'
         env:
           data-salida: ${{ steps.terraform-output.outputs.stdout }}
-        run: echo ${{ env.data-salida }}
+        run: echo "${{ env.data-salida }}"
       
       
       - name: Subida Estado a S3
