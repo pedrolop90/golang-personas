@@ -14,13 +14,13 @@ jobs:
       working-directory: ./terraform
     steps:
       - name: 'Terraform Init'
-        uses: hashicorp/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@v0.6.1
         with:
           tf_actions_version: 0.12.13
           tf_actions_subcommand: 'init'
           tf_actions_working_dir: 'terraform'
       - name: 'Terraform Validate'
-        uses: hashicorp/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@v0.6.1
         with:
           tf_actions_version: 0.12.13
           tf_actions_subcommand: 'validate'
