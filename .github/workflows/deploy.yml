@@ -57,7 +57,7 @@ jobs:
       
       - name: Copiar Todo a Temp
         working-directory: 'test'
-        run: cp -t ${{ terraform.tfstate.backup }}/test/ ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ terraform.tfstate.backup }}/${{ env.working-directory }}/terraform.tfstate
+        run: cp -t ${{ github.GITHUB_WORKSPACE }}/test/ ${{ github.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate.backup ${{ github.GITHUB_WORKSPACE }}/${{ env.working-directory }}/terraform.tfstate
       
       - name: Subida Estado a S3
         uses: reggionick/s3-deploy@v3
