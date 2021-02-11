@@ -91,7 +91,7 @@ jobs:
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: $(echo ${{ steps.output.outputs }} | jq -r '.elb_dns_name.value')
+          host: ${{ steps.output.outputs.elb_dns_name.value }}
           username: ${{ env.USUARIO_EC2 }}
           key: ${{ env.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ env.PUERTO_APLICACION }}:${{ env.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ env.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
