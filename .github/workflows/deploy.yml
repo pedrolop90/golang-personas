@@ -77,7 +77,7 @@ jobs:
       - name: 'Terraform Output'
         id: terraform-output
         run: terraform output -json
-        continue-on-error: true
+        working-directory: ${{ env.working-directory }}
       - name: 'Use Terraform Output'
         run: echo ${{ steps.terraform-output.outputs.stdout }}
       
