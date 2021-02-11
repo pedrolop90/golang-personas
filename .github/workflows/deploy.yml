@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
       - name: 'Dando permisos a estado de Terraform'
         working-directory: ${{ env.working-directory }}
-        run: chmod 777 terraform.tfstate
+        run: sudo chmod 777 terraform.tfstate
       
       - name: 'Generando tfvars al entorno'
         working-directory: ${{ env.working-directory }}
