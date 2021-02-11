@@ -66,7 +66,7 @@ jobs:
       - name: 'Ejecutando Terraform Apply'
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
+        #if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
@@ -107,7 +107,7 @@ jobs:
         uses: jakejarvis/wait-action@master
         env:
           data-salida: ${{ steps.terraform-plan.outputs.stdout }}
-        if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
+        #if: contains(${{ env.data-salida }}, 'No changes. Infrastructure is up-to-date') == false
         with:
           time: '120s'
       
