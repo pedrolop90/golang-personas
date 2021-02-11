@@ -90,7 +90,7 @@ jobs:
         id: endpoint_public
         #run: echo "IP_INSTANCE=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o \"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]\")"
         run: |
-          $ipPublic = $(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]")
+          $(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]") >> $ipPublic
           echo "IP Public: ${ipPublic}"
           echo "::set-output name=ipPublic::${ipPublic}"
       
