@@ -43,15 +43,20 @@ jobs:
           TERRAFORM_TFVARS_BASE64: ${{ secrets.TERRAFORM_TFVARS_BASE64 }}
         run: terraform plan -no-color
       
-      - run: echo ${{ steps.plan.outputs.stderr }}
-      - run: echo ${{ steps.plan.outputs.exitcode }}
-      
       - name: Terraform Apply
         id: apply
         working-directory: ${{ env.working-directory }}
         run: terraform apply -auto-approve
       
-      - run: echo "${{ steps.plan.outputs.stdout }}"
+      - name: Terraform Output
+        id: output
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'output'
+          tf_actions_working_dir: ${{ env.working-directory }}
+      - name: 'Use Terraform Output'
+        run: echo ${{ steps.terraform.outputs  }}
       
       - name: construir y subir a dockerhub
         uses: docker/build-push-action@v2
@@ -62,10 +67,13 @@ jobs:
           tag_with_ref: true
           tag_with_sha: true
           tags: ${{ github.sha }}
+          
+      - run: echo "${{ steps.apply.outputs }}"
+      
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ steps.apply.outputs.elb_dns_name }}
+          host: $(echo ${{ steps.output.outputs.tf_actions_output }} | jq -r '.elb_dns_name.value.name')
           username: ${{ secrets.USUARIO_EC2 }}
           key: ${{ secrets.LLAVE_PRIVADA_EC2 }}
           script: docker run -p ${{ secrets.PUERTO_APLICACION }}:${{ secrets.PUERTO_APLICACION }} --name alcancia-prueba -d ${{ secrets.DOCKERHUB_REPOSITORIO }}:${{ github.sha }}
