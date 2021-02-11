@@ -88,9 +88,7 @@ jobs:
 
       - name: Salida estandar ip instance
         id: endpoint_public
-        env:
-          data_entrada: ${{ steps.output.outputs }}
-        run: echo "instance_public_ip=$(echo ${{ env.data_entrada }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        run: echo "instance_public_ip=$(echo ${{ steps.output.outputs }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
