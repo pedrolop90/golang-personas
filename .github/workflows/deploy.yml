@@ -108,9 +108,7 @@ jobs:
         id: endpoint_public
         env:
           TESTING_DATA: ${{ secrets.TESTING_DATA }}
-        run: echo ${{ env.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]'
-#          echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]'
-#          echo "action_state=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        run: echo "action_state=$(echo ${{ secrets.TESTING_DATA }} | base64 -d |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
       - name: Use the value
         id: step_two
         run: echo "${{ env.action_state }}"
