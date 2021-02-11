@@ -86,9 +86,11 @@ jobs:
           tag_with_sha: true
           tags: ${{ github.sha }}
 
-      - name: Salida estandar ip instance
-        id: endpoint_public
+      - name: Formatear ip de terraform
         run: echo "instance_public_ip=$(echo ${{ steps.output.outputs }} |  grep -A2 'value' | grep -o '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]')" >> $GITHUB_ENV
+        
+      - name: Salida estandar ip instance
+        run: echo "${{ env.instance_public_ip }}"
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
