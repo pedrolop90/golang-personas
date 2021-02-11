@@ -20,7 +20,7 @@ jobs:
 #        run: terraform fmt -check
       - name: Terraform Init
         id: init
-        working-directory: ${{ env.working-directory }}
+        #working-directory: ${{ env.working-directory }}
         run: terraform init
       - name: Terraform Validate
         id: validate
